@@ -58,9 +58,13 @@ class App extends Component {
       });
 
       // Ready
-      player.on('ready', data => {
+      player.on('ready', async data => {
+        // Get random track from playlist
+        let track = (await this.getRandomTrack()).items;
+        track = track[Math.floor(Math.random() * track.length)].track;
+
         // Play a track using our new device ID
-        this.play(data.device_id, this.state.token);
+        this.play(data.device_id, this.state.token, track.uri);
       });
 
       // Connect to the player!
@@ -75,11 +79,21 @@ class App extends Component {
     };
   }
 
-  play = (device_id, token) => {
+  getRandomTrack = () => {
+    return $.ajax({
+      url: 'https://api.spotify.com/v1/playlists/5jSQqoEWwTH1WuwNBBcTa1/tracks',
+      type: 'GET',
+      beforeSend: xhr => {
+        xhr.setRequestHeader('Authorization', 'Bearer ' + this.state.token);
+      },
+    });
+  };
+
+  play = (device_id, token, track) => {
     $.ajax({
       url: 'https://api.spotify.com/v1/me/player/play?device_id=' + device_id,
       type: 'PUT',
-      data: '{"uris": ["spotify:track:5ya2gsaIhTkAuWYEMB0nw5"]}',
+      data: `{"uris": ["${track}"]}`,
       beforeSend: xhr => {
         xhr.setRequestHeader('Authorization', 'Bearer ' + token);
       },
