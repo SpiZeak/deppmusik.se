@@ -50,11 +50,13 @@ class App extends Component {
 
       // Playback status updates
       player.on('player_state_changed', state => {
-        $('#current-track').attr(
-          'src',
-          state.track_window.current_track.album.images[0].url,
-        );
-        $('#current-track-name').text(state.track_window.current_track.name);
+        if (state.track_window) {
+          $('#current-track').attr(
+            'src',
+            state.track_window.current_track.album.images[0].url,
+          );
+          $('#current-track-name').text(state.track_window.current_track.name);
+        }
       });
 
       // Ready
@@ -105,11 +107,14 @@ class App extends Component {
       <div className='App'>
         <header className='App-header'>
           {this.state.item && (
-            <Player
-              item={this.state.item}
-              paused={this.state.paused}
-              progress_ms={this.progress_ms}
-            />
+            <>
+              <Player
+                item={this.state.item}
+                paused={this.state.paused}
+                progress_ms={this.progress_ms}
+              />
+              <a href={this.state.item.uri}>Öppna spotify</a>
+            </>
           )}
         </header>
       </div>
