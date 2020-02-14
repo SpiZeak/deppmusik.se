@@ -1,3 +1,5 @@
+/* global Spotify */
+
 import React, { Component } from 'react';
 import * as $ from 'jquery';
 import { authEndpoint, clientId, redirectUri, scopes } from './config';
@@ -6,8 +8,6 @@ import Player from './Player';
 import './App.css';
 
 let player;
-
-/* global Spotify */
 
 class App extends Component {
   constructor() {
@@ -22,15 +22,12 @@ class App extends Component {
   }
 
   componentDidMount() {
-    // Set token
     let _token = hash.access_token;
 
     if (_token) {
-      // Set token
       this.setState({
         token: _token,
       });
-      // this.getCurrentlyPlaying(_token);
     } else {
       window.location = `${authEndpoint}?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scopes.join(
         '%20',
@@ -62,17 +59,14 @@ class App extends Component {
 
       // Ready
       player.on('ready', data => {
-        console.log('Ready with Device ID', data.device_id);
-
         // Play a track using our new device ID
         this.play(data.device_id, this.state.token);
       });
 
-      //Connect to the player!
+      // Connect to the player!
       player.connect();
 
       player.on('player_state_changed', data => {
-        console.log(data);
         this.setState({
           paused: data.paused,
           item: data.track_window.current_track,
@@ -89,7 +83,6 @@ class App extends Component {
       beforeSend: xhr => {
         xhr.setRequestHeader('Authorization', 'Bearer ' + token);
       },
-      success: data => {},
     });
   };
 
