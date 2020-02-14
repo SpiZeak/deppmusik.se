@@ -15,18 +15,10 @@ class App extends Component {
 
     this.state = {
       token: null,
-      item: {
-        album: {
-          images: [{ url: '' }],
-        },
-        name: '',
-        artists: [{ name: '' }],
-        duration_ms: 0,
-      },
-      is_playing: 'Paused',
+      item: null,
+      paused: true,
       progress_ms: 0,
     };
-    this.getCurrentlyPlaying = this.getCurrentlyPlaying.bind(this);
   }
 
   componentDidMount() {
@@ -38,7 +30,7 @@ class App extends Component {
       this.setState({
         token: _token,
       });
-      this.getCurrentlyPlaying(_token);
+      // this.getCurrentlyPlaying(_token);
     } else {
       window.location = `${authEndpoint}?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scopes.join(
         '%20',
@@ -78,6 +70,14 @@ class App extends Component {
 
       //Connect to the player!
       player.connect();
+
+      player.on('player_state_changed', data => {
+        console.log(data);
+        this.setState({
+          paused: data.paused,
+          item: data.track_window.current_track,
+        });
+      });
     };
   }
 
@@ -89,41 +89,18 @@ class App extends Component {
       beforeSend: xhr => {
         xhr.setRequestHeader('Authorization', 'Bearer ' + token);
       },
-      success: data => {
-        this.getCurrentlyPlaying();
-      },
+      success: data => {},
     });
   };
-
-  getCurrentlyPlaying(token) {
-    // Make a call using the token
-    $.ajax({
-      url: 'https://api.spotify.com/v1/me/player',
-      type: 'GET',
-      beforeSend: xhr => {
-        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-      },
-      success: data => {
-        console.log(data);
-        if (data) {
-          this.setState({
-            item: data.item,
-            is_playing: data.is_playing,
-            progress_ms: data.progress_ms,
-          });
-        }
-      },
-    });
-  }
 
   render() {
     return (
       <div className='App'>
         <header className='App-header'>
-          {this.state.token && (
+          {this.state.item && (
             <Player
               item={this.state.item}
-              is_playing={this.state.is_playing}
+              paused={this.state.paused}
               progress_ms={this.progress_ms}
             />
           )}
